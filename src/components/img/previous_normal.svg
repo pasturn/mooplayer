@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="33px" height="33px" viewBox="0 0 33 33" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>previous_normal</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M15.0049034,13.8769415 L15.0049034,12.5364234 C15.0049034,10.3272618 16.4284601,9.62178962 18.1845063,10.9605782 L22.1422332,13.9779018 C23.8981425,15.316586 23.8919732,17.4754638 22.1281479,18.7996572 L18.1985915,21.7497754 C16.4394287,23.0704686 15.0049034,22.3566073 15.0049034,20.1475034 L15.0049034,18.8885019 L11.1936881,21.7497754 C9.43452527,23.0704686 8,22.3566073 8,20.1475034 L8,12.5364234 C8,10.3272618 9.42355669,9.62178962 11.1796029,10.9605782 L15.0049034,13.8769415 Z" id="path-1"></path>
+        <filter x="-50%" y="-50%" width="200%" height="200%" filterUnits="objectBoundingBox" id="filter-2">
+            <feGaussianBlur stdDeviation="0.5" in="SourceAlpha" result="shadowBlurInner1"></feGaussianBlur>
+            <feOffset dx="0" dy="1" in="shadowBlurInner1" result="shadowOffsetInner1"></feOffset>
+            <feComposite in="shadowOffsetInner1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowInnerInner1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.3 0" type="matrix" in="shadowInnerInner1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="iPhone-6-Copy" transform="translate(-33.000000, -218.000000)">
+            <g id="previous_normal" transform="translate(33.000000, 218.000000)">
+                <path d="M16.5,33 C25.6126984,33 33,25.6126984 33,16.5 C33,7.38730163 25.6126984,0 16.5,0 C7.38730163,0 0,7.38730163 0,16.5 C0,25.6126984 7.38730163,33 16.5,33 Z" id="Oval-1" fill="#FFFFFF"></path>
+                <g id="Combined-Shape" transform="translate(15.881917, 16.347722) scale(-1, 1) translate(-15.881917, -16.347722) ">
+                    <use fill="#F5F5F5" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

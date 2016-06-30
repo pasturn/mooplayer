@@ -3,16 +3,16 @@
         <div class="timer">
             <span>{{currentTime}}/{{duration}}</span>
         </div>
-        <div class="progress-wrap">
-            <div class="point" :style="{ left: activeWidth + '%' }"></div>
-            <div class="progress"></div>
-            <div class="active-progress" :style="{ width: activeWidth + '%' }"></div>
+        <div class="progress-wrap" v-on:click.stop="setPointPosition">
+            <div class="point" v-on:mousedown="setMouseDrag"  :style="{ left: activePosition + '%' }"></div>
+            <div class="active-progress" :style="{ width: activePosition + '%' }"></div>
+            <div class="buffered-progress" :style="{ width: bufferedPosition + '%' }"></div>
+            <div class="progress" ></div>
         </div>
-
     </div>
     <div class="controler">
-        <div class="side">
-            <a class="loop" href="javascript:;">循环</a>
+        <div class="left-side">
+            <a class="loop" v-bind:class="{ 'single-loop': isSingle, 'all-loop': !isSingle }" v-on:click="singleLoop" href="javascript:;" ></a>
         </div>
         <div class="s-warp">
             <a class="s-run btn-previous" href="javascript:;" v-on:click="actionPrevious"></a>
@@ -23,6 +23,9 @@
         <div class="s-warp">
             <a class="s-run btn-next" href="javascript:;" v-on:click="actionNext"></a>
         </div>
+        <div class="right-side">
+            <a class="volume" href="javascript:;"></a>
+        </div>
         <audio v-el:audio
                @timeupdate="onTimeUpdateListener"
                @play="isPlayListener"
@@ -30,18 +33,23 @@
                @ended="isPlayListener"
                id="jp_audio_0"
                preload="metadata"
-               src="http://rm.sina.com.cn/wm/VZ2010050511043310440VK/music/MUSIC1005051622027270.mp3"></audio>
+               src="./static/1.mp3"></audio>
     </div>
 </template>
 <script>
     export default {
         data () {
             return {
-                activeWidth: 0,
+                activePosition: 0,
+                bufferedPosition: 0,
                 currentTime: '00:00', // The initial current time
                 duration: '00:00',
                 isPause: true,
-                isPlay: false
+                isPlay: false,
+                isSingle: false,
+                clientX: null,
+                isDrag: false,
+                downPosition: null
             }
         },
         methods: {
@@ -67,6 +75,15 @@
             actionNext () {
                 this.$els.audio.currentTime += 5
             },
+            singleLoop () {
+                if (this.$els.audio.loop === false) {
+                    this.$els.audio.loop = true
+                    this.isSingle = true
+                } else {
+                    this.$els.audio.loop = false
+                    this.isSingle = false
+                }
+            },
             isPlayListener () {
                 if (this.$els.audio.paused || this.$els.audio.ended) {
                     this.isPlay = false
@@ -76,12 +93,46 @@
                     this.isPause = false
                 }
             },
+            handleMouseMove (e) {
+                var _offset = (((e.clientX - this.clientX) / 315))
+                var _activePosition = this.downPosition + _offset * 100
+                if (_activePosition <= 0) {
+                    this.activePosition = 0
+                    this.$els.audio.currentTime = 0
+                } else if (_activePosition >= 100) {
+                    this.activePosition = 100
+                    this.$els.audio.currentTime = this.$els.audio.duration * 1
+                } else {
+                    this.activePosition = _activePosition
+                    this.$els.audio.currentTime = this.$els.audio.duration * (_activePosition / 100)
+                }
+            },
+            setMouseDrag (e) {
+                if (this.$els.audio.readyState === 4) {
+                    var $this = this
+                    this.isDrag = true
+                    this.downPosition = this.activePosition
+                    this.clientX = e.clientX
+                    document.addEventListener('mousemove', $this.handleMouseMove, false)
+                    document.addEventListener('mouseup', function (e) {
+                        document.removeEventListener('mousemove', $this.handleMouseMove, false)
+                    }, false)
+                }
+            },
+            setPointPosition (e) {
+                if (e.target.className !== 'point') {
+                    var _proportion = (e.layerX / 315)
+                    this.activePosition = _proportion * 100
+                    this.$els.audio.currentTime = this.$els.audio.duration * _proportion
+                }
+            },
             onTimeUpdateListener () {
-                // Update current time
-                var _currentTime = new Date(this.$els.audio.currentTime * 1000)
+                var _audio = this.$els.audio
+                var _currentTime = new Date(_audio.currentTime * 1000)
                 this.currentTime = this.formatTime(_currentTime)
-                this.activeWidth = (this.$els.audio.currentTime / this.$els.audio.duration) * 100
-                if (this.$els.audio.ended === true) {
+                this.bufferedPosition = (_audio.buffered.end(_audio.buffered.length - 1) / _audio.duration) * 100
+                this.activePosition = (_audio.currentTime / _audio.duration) * 100
+                if (_audio.ended === true) {
                     this.isPlay = false
                     this.isPause = true
                 }
@@ -103,12 +154,12 @@
         align-self: flex-end;
         color: #999999;
         padding: 7px 0;
-
     }
     .progress-wrap{
         width: 315px;
         height: 6px;
         position: relative;
+        cursor: pointer
     }
     .point{
         height: 12px;
@@ -121,6 +172,22 @@
         box-shadow: 0 1px 2px #999999;
         z-index: 99;
     }
+    .active-progress{
+        height: 6px;
+        position: absolute;
+        background: #3EDCFE;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) inset;
+        border-radius: 5px;
+        z-index: 3;
+    }
+    .buffered-progress{
+        height: 6px;
+        position: absolute;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) inset;
+        background: #e4e4e4;
+        border-radius: 5px;
+        z-index: 2;
+    }
     .progress{
         width: 315px;
         height: 6px;
@@ -129,14 +196,6 @@
         border-radius: 5px;
         position: absolute;
         z-index: 1;
-    }
-    .active-progress{
-        height: 6px;
-        position: absolute;
-        background: #3EDCFE;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.31) inset;
-        border-radius: 5px;
-        z-index: 3;
     }
     .controler{
         display: flex;
@@ -156,12 +215,11 @@
         align-items: center;
         width: 85px;
         height: 85px;
-        border-radius: 50px;
+        border-radius: 47px;
         background: -webkit-linear-gradient(#f5f5f5, #f8f8f8); /* Safari 5.1 - 6.0 */
         background: -o-linear-gradient(#f5f5f5, #f8f8f8); /* Opera 11.1 - 12.0 */
         background: -moz-linear-gradient(#f5f5f5, #f8f8f8); /* Firefox 3.6 - 15 */
         background: linear-gradient(#f5f5f5, #f8f8f8); /* 标准的语法 */
-
     }
     .s-warp{
         display: flex;
@@ -171,7 +229,7 @@
         align-items: center;
         width: 45px;
         height: 45px;
-        border-radius:50px;
+        border-radius:23px;
         background: -webkit-linear-gradient(#f5f5f5, #f8f8f8); /* Safari 5.1 - 6.0 */
         background: -o-linear-gradient(#f5f5f5, #f8f8f8); /* Opera 11.1 - 12.0 */
         background: -moz-linear-gradient(#f5f5f5, #f8f8f8); /* Firefox 3.6 - 15 */
@@ -235,7 +293,36 @@
     .btn-next:hover{
         background: url(./img/next_active.svg) #ffffff;
     }
-    .side{
-
+    .left-side{
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 70px;
+        height: 33px;
+    }
+    .right-side{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        width: 70px;
+        height: 33px;
+    }
+    .loop{
+        width: 24px;
+        height: 24px;
+    }
+    .single-loop{
+        background: url(./img/single_loop.svg);
+    }
+    .all-loop{
+        background: url(./img/all_loop.svg);
+    }
+    .volume{
+        width: 24px;
+        height: 24px;
+        background: url(./img/volume-normal.svg);
+    }
+    .volume:hover{
+        background: url(./img/volume-active.svg);
     }
 </style>

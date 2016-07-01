@@ -1,9 +1,26 @@
 <template>
     <div class="song">
-        <span class="song-title">デスクトップ・シンデレラ</span>
-        <span class="song-author">wewe</span>
+        <span class="song-title" v-html="title"></span>
+        <span class="song-author" v-html="artist"></span>
     </div>
 </template>
+<script>
+    export default {
+        props: ['songInfo'],
+        data () {
+            return {
+                title: '',
+                artist: ''
+            }
+        },
+        watch: {
+            'songInfo': function (val, oldVal) {
+                this.$set('title', val.song[0].title)
+                this.$set('artist', val.song[0].artist)
+            }
+        }
+    }
+</script>
 <style>
    .song{
        display: flex;

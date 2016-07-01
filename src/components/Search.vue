@@ -7,9 +7,7 @@
     .search{
         position: absolute;
         z-index: 99;
-        width: 375px;
         text-align: center;
-        padding: 15px 0;
     }
     .search-input{
         height: 40px;

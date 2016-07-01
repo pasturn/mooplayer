@@ -1,45 +1,48 @@
 <template>
-    <div class="bar">
-        <div class="timer">
-            <span>{{currentTime}}/{{duration}}</span>
+    <div>
+        <div class="bar">
+            <div class="timer">
+                <span>{{currentTime}}/{{duration}}</span>
+            </div>
+            <div class="progress-wrap" v-on:click.stop="setPointPosition">
+                <div class="point" v-on:mousedown="setMouseDrag"  :style="{ left: activePosition + '%' }"></div>
+                <div class="active-progress" :style="{ width: activePosition + '%' }"></div>
+                <div class="buffered-progress" :style="{ width: bufferedPosition + '%' }"></div>
+                <div class="progress" ></div>
+            </div>
         </div>
-        <div class="progress-wrap" v-on:click.stop="setPointPosition">
-            <div class="point" v-on:mousedown="setMouseDrag"  :style="{ left: activePosition + '%' }"></div>
-            <div class="active-progress" :style="{ width: activePosition + '%' }"></div>
-            <div class="buffered-progress" :style="{ width: bufferedPosition + '%' }"></div>
-            <div class="progress" ></div>
+        <div class="controler">
+            <div class="left-side">
+                <a class="loop" v-bind:class="{ 'single-loop': isSingle, 'all-loop': !isSingle }" v-on:click="singleLoop" href="javascript:;" ></a>
+            </div>
+            <div class="s-warp">
+                <a class="s-run btn-previous" href="javascript:;" v-on:click="actionPrevious"></a>
+            </div>
+            <div class="b-warp">
+                <a class="b-run" v-bind:class="{ 'btn-play': isPause, 'btn-pause': isPlay }" href="javascript:;" v-on:click="actionPlay"></a>
+            </div>
+            <div class="s-warp">
+                <a class="s-run btn-next" href="javascript:;" v-on:click="actionNext"></a>
+            </div>
+            <div class="right-side">
+                <a class="volume" href="javascript:;"></a>
+            </div>
+            <audio v-el:audio
+                   @timeupdate="onTimeUpdateListener"
+                   @play="isPlayListener"
+                   @pause="isPlayListener"
+                   @ended="isPlayListener"
+                   id="jp_audio_0"
+                   :src="songUrl"></audio>
         </div>
-    </div>
-    <div class="controler">
-        <div class="left-side">
-            <a class="loop" v-bind:class="{ 'single-loop': isSingle, 'all-loop': !isSingle }" v-on:click="singleLoop" href="javascript:;" ></a>
-        </div>
-        <div class="s-warp">
-            <a class="s-run btn-previous" href="javascript:;" v-on:click="actionPrevious"></a>
-        </div>
-        <div class="b-warp">
-            <a class="b-run" v-bind:class="{ 'btn-play': isPause, 'btn-pause': isPlay }" href="javascript:;" v-on:click="actionPlay"></a>
-        </div>
-        <div class="s-warp">
-            <a class="s-run btn-next" href="javascript:;" v-on:click="actionNext"></a>
-        </div>
-        <div class="right-side">
-            <a class="volume" href="javascript:;"></a>
-        </div>
-        <audio v-el:audio
-               @timeupdate="onTimeUpdateListener"
-               @play="isPlayListener"
-               @pause="isPlayListener"
-               @ended="isPlayListener"
-               id="jp_audio_0"
-               preload="metadata"
-               src="./static/1.mp3"></audio>
     </div>
 </template>
 <script>
     export default {
+        props: ['songData'],
         data () {
             return {
+                songUrl: '',
                 activePosition: 0,
                 bufferedPosition: 0,
                 currentTime: '00:00', // The initial current time
@@ -60,12 +63,12 @@
             },
             actionPlay () {
                 if (this.$els.audio.readyState === 4) {
-                    var _duration = new Date(this.$els.audio.duration * 1000)
-                    this.duration = this.formatTime(_duration)
-                    if (this.$els.audio.paused) {
-                        this.$els.audio.play()
-                    } else {
-                        this.$els.audio.pause()
+                    if (this.$els.audio.readyState === 4) {
+                        if (this.$els.audio.paused) {
+                            this.$els.audio.play()
+                        } else {
+                            this.$els.audio.pause()
+                        }
                     }
                 }
             },
@@ -108,7 +111,7 @@
                 }
             },
             setMouseDrag (e) {
-                if (this.$els.audio.readyState === 4) {
+                if (!this.$els.audio.paused) {
                     var $this = this
                     this.isDrag = true
                     this.downPosition = this.activePosition
@@ -128,14 +131,24 @@
             },
             onTimeUpdateListener () {
                 var _audio = this.$els.audio
-                var _currentTime = new Date(_audio.currentTime * 1000)
-                this.currentTime = this.formatTime(_currentTime)
-                this.bufferedPosition = (_audio.buffered.end(_audio.buffered.length - 1) / _audio.duration) * 100
-                this.activePosition = (_audio.currentTime / _audio.duration) * 100
-                if (_audio.ended === true) {
-                    this.isPlay = false
-                    this.isPause = true
+                if (_audio.readyState === 4) {
+                    var _duration = new Date(_audio.duration * 1000)
+                    this.duration = this.formatTime(_duration)
+                    var _currentTime = new Date(_audio.currentTime * 1000)
+                    this.currentTime = this.formatTime(_currentTime)
+                    this.bufferedPosition = (_audio.buffered.end(_audio.buffered.length - 1) / _audio.duration) * 100
+                    this.activePosition = (_audio.currentTime / _audio.duration) * 100
+                    if (_audio.ended === true) {
+                        this.isPlay = false
+                        this.isPause = true
+                    }
                 }
+            }
+        },
+        watch: {
+            'songData': function (val, oldVal) {
+                this.$set('songUrl', val.song[0].url)
+                this.$els.audio.autoplay = true
             }
         }
     }
@@ -263,20 +276,12 @@
     }
     .btn-play{
         background: url(./img/play_normal.svg) #ffffff;
-        /*transition:background-image 1.5s;*/
-        /*-moz-transition:background-image 1.5s; /!* Firefox 4 *!/*/
-        /*-webkit-transition:background-image 1.5s; /!* Safari and Chrome *!/*/
-        /*-o-transition:background-image 1.5s; /!* Opera *!/*/
     }
     .btn-play:hover{
         background-image: url(./img/play_active.svg);
     }
     .btn-pause{
         background: url(./img/pause_normal.svg) #ffffff;
-        /*transition:background-image 1.5s;*/
-        /*-moz-transition:background-image 1.5s; /!* Firefox 4 *!/*/
-        /*-webkit-transition:background-image 1.5s; /!* Safari and Chrome *!/*/
-        /*-o-transition:background-image 1.5s; /!* Opera *!/*/
     }
     .btn-pause:hover{
         background-image: url(./img/pause_active.svg);
@@ -301,6 +306,7 @@
         height: 33px;
     }
     .right-side{
+        position: relative;
         display: flex;
         justify-content: flex-end;
         align-items: center;

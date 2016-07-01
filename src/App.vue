@@ -1,21 +1,37 @@
 <template>
   <div id="app">
-    <Albumcover></Albumcover>
-    <Player></Player>
+    <Albumcover :song="data" v-on:get-song="getSong"></Albumcover>
+    <Player :song="data"></Player>
   </div>
 </template>
 <script>
-    import Albumcover from './components/Albumcover.vue'
-    import Player from './components/Player.vue'
-    export default {
-        components: {Albumcover, Player}
-    }
+import Albumcover from './components/Albumcover.vue'
+import Player from './components/Player.vue'
+export default {
+    ready () {
+        this.getSong()
+    },
+    data () {
+        return {
+            data: {}
+        }
+    },
+    methods: {
+        getSong () {
+            this.$http({url: 'http://api.jirengu.com/fm/getSong.php', method: 'get'}).then((response) => {
+                console.log(JSON.parse(response.data))
+                this.$set('data', JSON.parse(response.data))
+                // success callback
+            }, (response) => {}
+        ) }
+    },
+    components: {Albumcover, Player}
+}
 </script>
 <style>
 html {
     height: 100%;
 }
-
 body {
     display: flex;
     display: -webkit-flex;

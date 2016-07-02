@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Albumcover :song="data" v-on:get-song="getSong"></Albumcover>
-    <Player :song="data"></Player>
+    <Player :song="data" v-on:get-song="getSong"></Player>
   </div>
 </template>
 <script>
@@ -42,7 +42,6 @@ body {
     font-family: Source Sans Pro, Helvetica, sans-serif;
     background: #e2e2e2;
 }
-
 #app {
     background: #ffffff;
     max-width: 600px;

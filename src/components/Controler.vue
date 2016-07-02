@@ -63,12 +63,10 @@
             },
             actionPlay () {
                 if (this.$els.audio.readyState === 4) {
-                    if (this.$els.audio.readyState === 4) {
-                        if (this.$els.audio.paused) {
-                            this.$els.audio.play()
-                        } else {
-                            this.$els.audio.pause()
-                        }
+                    if (this.$els.audio.paused) {
+                        this.$els.audio.play()
+                    } else {
+                        this.$els.audio.pause()
                     }
                 }
             },
@@ -129,6 +127,9 @@
                     this.$els.audio.currentTime = this.$els.audio.duration * _proportion
                 }
             },
+            nextSong () {
+                this.$dispatch('get-song')
+            },
             onTimeUpdateListener () {
                 var _audio = this.$els.audio
                 if (_audio.readyState === 4) {
@@ -138,9 +139,8 @@
                     this.currentTime = this.formatTime(_currentTime)
                     this.bufferedPosition = (_audio.buffered.end(_audio.buffered.length - 1) / _audio.duration) * 100
                     this.activePosition = (_audio.currentTime / _audio.duration) * 100
-                    if (_audio.ended === true) {
-                        this.isPlay = false
-                        this.isPause = true
+                    if (_audio.ended === true && this.isSingle === false) {
+                        this.nextSong()
                     }
                 }
             }
@@ -149,6 +149,10 @@
             'songData': function (val, oldVal) {
                 this.$set('songUrl', val.song[0].url)
                 this.$els.audio.autoplay = true
+                if (this.$els.audio !== 4) {
+                    this.currentTime = '00:00'
+                    this.duration = '00:00'
+                }
             }
         }
     }

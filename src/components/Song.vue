@@ -1,7 +1,7 @@
 <template>
     <div class="song">
-        <span class="song-title" v-html="title"></span>
-        <span class="song-author" v-html="artist"></span>
+        <span class="song-title" v-text="title"></span>
+        <span class="song-author" v-text="artist"></span>
     </div>
 </template>
 <script>
@@ -30,7 +30,6 @@
        width: 375px;
        box-sizing: border-box;
        padding: 15px 30px;
-
    }
     .song-title{
         font-size: 1em;

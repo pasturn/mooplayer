@@ -1,7 +1,7 @@
 <template>
     <div class="palyer">
         <Song :song-info="song"></Song>
-        <Lyric></Lyric>
+        <Lyric :song-data="song"></Lyric>
         <Control :song-data="song"></Control>
     </div>
 </template>

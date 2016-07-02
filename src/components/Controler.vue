@@ -150,8 +150,8 @@
                 this.$set('songUrl', val.song[0].url)
                 this.$els.audio.autoplay = true
                 if (this.$els.audio !== 4) {
-                    this.currentTime = '00:00'
-                    this.duration = '00:00'
+                    this.currentTime = this.duration = '00:00'
+                    this.activePosition = this.bufferedPosition = 0
                 }
             }
         }
